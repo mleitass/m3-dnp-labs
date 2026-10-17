@@ -22,9 +22,17 @@ def cmd_reset(_args) -> list[str]:
     summary = system.reset()
     return [
         "Sākuma stāvoklis izveidots: " + clock.fmt_dt(summary["now"]) + ", pirms katastrofas.",
-        f"  Iesniegumi: {clock.fmt_int(summary['records'])}",
+        f"  Iesniegumi: {clock.fmt_int(summary['records'])}"
+        f" · rezerves kopijas: {summary['backups']}",
         "Nākamais solis: make status",
     ]
+
+
+def cmd_backup_list(_args) -> list[str]:
+    from drill import backups
+
+    _require_state()
+    return backups.list_lines()
 
 
 def cmd_status(_args) -> list[str]:
@@ -65,6 +73,7 @@ def _require_state() -> dict:
 COMMANDS = {
     "reset": cmd_reset,
     "status": cmd_status,
+    "backup-list": cmd_backup_list,
     "replicate": cmd_replicate,
     "llm": cmd_llm,
 }

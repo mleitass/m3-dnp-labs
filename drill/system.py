@@ -3,7 +3,7 @@
 import json
 import shutil
 
-from drill import paths, replica, seed, state, triage_versions
+from drill import backups, paths, replica, seed, state, triage_versions
 from drill.clock import NOW
 
 SIZES_GB = {"db": 30, "attachments": 170}  # simulētie izmēri (faili ir mazi)
@@ -40,6 +40,7 @@ def reset() -> dict:
     current = state.initial()
     current["servers"]["standby"] = state.SERVER_UP
     current["standby_synced_at"] = replica.build_initial().isoformat()
+    backups.build_history(backups.SCOPE_FULL)
     state.save(current)
     (paths.root() / "darbibu-zurnals.txt").write_text(
         "Darbību žurnāls (bez laika zīmogiem)\nreset\n", encoding="utf-8"
@@ -47,5 +48,6 @@ def reset() -> dict:
     return {
         "records": len(operative),
         "attachments": sum(len(r.attachments) for r in operative),
+        "backups": len(backups.catalog()),
         "now": NOW,
     }
