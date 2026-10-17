@@ -379,11 +379,18 @@ def write_database(path: Path, records: list, snapshot_at: datetime | None = Non
     conn.close()
 
 
+def attachment_name(submission_id: str, filename: str) -> str:
+    """Faila nosaukums pielikumu mapē: IES-2026-011835_foto-1.jpg."""
+    return f"{submission_id}_{filename}"
+
+
 def attachment_files(records: list):
-    """(relatīvais ceļš mapē pielikumi/, saturs) katram pielikumam."""
+    """(faila nosaukums mapē pielikumi/, saturs) katram pielikumam."""
     for record in records:
         for filename, size, _digest in record.attachments:
-            yield f"{record.id}/{filename}", attachment_bytes(record.id, filename, size)
+            yield attachment_name(record.id, filename), attachment_bytes(
+                record.id, filename, size
+            )
 
 
 def write_server(
@@ -392,11 +399,10 @@ def write_server(
 ) -> None:  # fmt: skip
     """Servera disks: datubāze, pielikumi un triāžas konfigurācija."""
     write_database(server_dir / "db" / "iesniegumi.db", records, snapshot_at)
-    for relative, content in attachment_files(records):
-        target = server_dir / "pielikumi" / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(content)
-    (server_dir / "pielikumi").mkdir(parents=True, exist_ok=True)
+    folder = server_dir / "pielikumi"
+    folder.mkdir(parents=True, exist_ok=True)
+    for name, content in attachment_files(records):
+        (folder / name).write_bytes(content)
     if triage_version:
         write_triage(server_dir / "triage", triage_version)
 

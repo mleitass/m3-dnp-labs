@@ -33,6 +33,16 @@ def cmd_status(_args) -> list[str]:
     return status.run()
 
 
+def cmd_replicate(_args) -> list[str]:
+    from drill import replica
+
+    _require_state()
+    try:
+        return replica.replicate()
+    except replica.ReplicaError as exc:
+        raise CommandError(str(exc)) from exc
+
+
 def cmd_llm(args) -> list[str]:
     import mock_llm
 
@@ -55,6 +65,7 @@ def _require_state() -> dict:
 COMMANDS = {
     "reset": cmd_reset,
     "status": cmd_status,
+    "replicate": cmd_replicate,
     "llm": cmd_llm,
 }
 

@@ -3,7 +3,7 @@
 import json
 import shutil
 
-from drill import paths, seed, state, triage_versions
+from drill import paths, replica, seed, state, triage_versions
 from drill.clock import NOW
 
 SIZES_GB = {"db": 30, "attachments": 170}  # simulētie izmēri (faili ir mazi)
@@ -37,7 +37,10 @@ def reset() -> dict:
     (sim / "gaidits.json").write_text(
         json.dumps(seed.expected_state(operative), ensure_ascii=False), encoding="utf-8"
     )
-    state.save(state.initial())
+    current = state.initial()
+    current["servers"]["standby"] = state.SERVER_UP
+    current["standby_synced_at"] = replica.build_initial().isoformat()
+    state.save(current)
     (paths.root() / "darbibu-zurnals.txt").write_text(
         "Darbību žurnāls (bez laika zīmogiem)\nreset\n", encoding="utf-8"
     )

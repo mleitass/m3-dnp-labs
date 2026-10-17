@@ -1,4 +1,5 @@
 import os
+import shutil
 import tempfile
 
 # Testi nekad neaiztiek grupas mācību sistēmu mapē sistema/.
@@ -29,15 +30,36 @@ def fake_omd():
     return FakeOmd()
 
 
-@pytest.fixture
-def sistema(tmp_path, monkeypatch):
-    """Svaiga mācību sistēma pagaidu mapē (tāpat kā pēc make reset)."""
+def _link_or_copy(source, target):
+    # Pielikumus sistēma nekad nepārraksta uz vietas, tāpēc tos var sasaistīt (ātrāk).
+    if f"{os.sep}pielikumi{os.sep}" in str(source):
+        os.link(source, target)
+    else:
+        shutil.copy2(source, target)
+
+
+@pytest.fixture(scope="session")
+def _sistema_template(tmp_path_factory):
     from drill import system
 
-    monkeypatch.setenv("EZERMALA_SISTEMA", str(tmp_path / "sistema"))
+    root = tmp_path_factory.mktemp("template") / "sistema"
+    previous = os.environ["EZERMALA_SISTEMA"]
+    os.environ["EZERMALA_SISTEMA"] = str(root)
+    try:
+        system.reset()
+    finally:
+        os.environ["EZERMALA_SISTEMA"] = previous
+    return root
+
+
+@pytest.fixture
+def sistema(_sistema_template, tmp_path, monkeypatch):
+    """Svaiga mācību sistēma pagaidu mapē (tāpat kā pēc make reset)."""
+    target = tmp_path / "sistema"
+    shutil.copytree(_sistema_template, target, copy_function=_link_or_copy)
+    monkeypatch.setenv("EZERMALA_SISTEMA", str(target))
     storage.use_system()
-    system.reset()
-    return tmp_path / "sistema"
+    return target
 
 
 @pytest.fixture
