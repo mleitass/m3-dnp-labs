@@ -9,8 +9,9 @@ Divi režīmi:
 import sqlite3
 import threading
 from contextlib import contextmanager
+from datetime import datetime, timedelta, timezone
 
-from drill import runtime
+from drill import clock, runtime
 
 COLUMNS = (
     "id",
@@ -210,6 +211,13 @@ def get(submission_id: str) -> dict | None:
     if row is None:
         return None
     return {column: row[column] for column in COLUMNS}
+
+
+def now() -> datetime:
+    """Servisa pulkstenis. Mācību sistēmā tas ir apturēts tūlīt pēc katastrofas brīža."""
+    if _memory is not None:
+        return datetime.now(timezone.utc).replace(microsecond=0)
+    return clock.NOW + timedelta(minutes=1)
 
 
 def count() -> int:

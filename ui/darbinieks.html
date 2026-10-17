@@ -76,8 +76,13 @@
       if (status) params.set("status", status);
       if (topic) params.set("topic", topic);
       const response = await fetch("/submissions?" + params.toString());
-      const data = await response.json();
       rows.innerHTML = "";
+      if (!response.ok) {
+        // M3: katastrofas laikā darbinieks redz skaidru kļūdu.
+        count.textContent = `Kļūda ${response.status}: iesniegumu saraksts nav pieejams.`;
+        return;
+      }
+      const data = await response.json();
       if (!Array.isArray(data)) {
         count.textContent = "Kļūda: " + JSON.stringify(data);
         return;

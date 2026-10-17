@@ -2,7 +2,7 @@
 
 import logging
 from collections.abc import Callable
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from pathlib import Path
 from typing import Annotated
 
@@ -94,7 +94,7 @@ def create_submission(
     data: SubmissionCreate,
     omd: Annotated[OmdLookup, Depends(get_omd)],
 ) -> SubmissionCreated:
-    received_at = datetime.now(timezone.utc).replace(microsecond=0)
+    received_at = storage.now()  # M3: mācību sistēmā simulētais laiks
     check = omd(data.personalCode)
     reply_channel, reason = decide_reply_channel(data.preferredChannel, check)
     routing = triage.route_new(data.subject, data.body)

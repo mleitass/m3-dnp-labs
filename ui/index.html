@@ -54,6 +54,7 @@
   </header>
 
   <main>
+    <div id="outage" class="message error" hidden></div>
     <form id="submission-form" class="card" novalidate>
       <label for="personalCode">Personas kods</label>
       <input id="personalCode" name="personalCode" autocomplete="off">
@@ -241,7 +242,24 @@
       }
     });
 
+    // M3: ja serviss nedarbojas, iedzīvotājs to redz uzreiz, nevis tikai pēc iesniegšanas.
+    async function checkHealth() {
+      let status = "nav savienojuma";
+      try {
+        const response = await fetch("/health");
+        if (response.ok) return;
+        status = "kļūda " + response.status;
+      } catch (error) {
+        // Paliek "nav savienojuma".
+      }
+      const outage = document.getElementById("outage");
+      outage.hidden = false;
+      outage.innerHTML = `<strong>Serviss īslaicīgi nav pieejams</strong> (${escapeHtml(status)}).<br>
+        Iesniegumu pašlaik nevar iesniegt. Lūdzu, mēģiniet vēlāk.`;
+    }
+
     loadTopics();
+    checkHealth();
   </script>
 </body>
 </html>

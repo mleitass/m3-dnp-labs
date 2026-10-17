@@ -196,6 +196,38 @@ def test_verify_never_reports_elapsed_time(sistema, capsys, group):
     assert not re.search(r"\d+(?:[.,]\d+)? ?s\b", out)
 
 
+def test_new_submission_after_restore_reuses_a_lost_number(sistema, capsys):
+    from fastapi.testclient import TestClient
+
+    from app.main import app, get_omd
+    from app.omd_client import OmdCheck, OmdResult
+
+    _start(capsys, 3)
+    run(capsys, "restore", "--backup", "D-1")
+    app.dependency_overrides[get_omd] = lambda: lambda code: OmdCheck(OmdResult.NOT_ACTIVATED)
+    try:
+        created = TestClient(app).post(
+            "/submissions",
+            json={
+                "personalCode": "32000009999",
+                "fullName": "Anna Paraudziņa",
+                "email": "anna@example.com",
+                "preferredChannel": "EMAIL",
+                "topic": "HEATING_SUPPORT",
+                "subject": "Apkures pabalsts",
+                "body": "Lūdzu piešķirt apkures pabalstu.",
+            },
+        )
+    finally:
+        app.dependency_overrides.clear()
+    assert created.status_code == 201
+    assert created.json()["receivedAt"].startswith("2026-10-19T08:41")
+    out = _verify(capsys)
+    assert _has(out, "Jauni pēc katastrofas", "1")
+    assert "piešķirti zaudēto numuri: 1" in out
+    assert _has(out, "Zaudēti", "100")
+
+
 def test_actions_are_logged_for_the_debrief(sistema, capsys):
     _start(capsys, 1)
     run(capsys, "failover")
