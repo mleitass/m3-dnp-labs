@@ -1,4 +1,4 @@
-"""CR-3: iesniegumu saraksts darbiniekam (tracker/CR-3.md)."""
+"""CR-3: iesniegumu saraksts darbiniekam (C1 prasība no M1)."""
 
 import pytest
 

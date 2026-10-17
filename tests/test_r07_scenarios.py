@@ -47,7 +47,10 @@ def test_g1_logical_corruption_also_on_standby(sistema, capsys):
     assert state.load()["standby_synced_at"] == "2026-10-19T08:30:00+03:00"
     _code, status = run(capsys, "status")
     assert "Portāls:             KĻŪDA" in status
-    assert "Rezerves serveris:   darbojas, sinhronizēts pirmdiena 19.10.2026 08:30" in status
+    assert (
+        "Rezerves serveris:   darbojas, sinhronizēts pirmdiena 19.10.2026 08:30"
+        in status
+    )
 
 
 @pytest.mark.parametrize("group", ["2", "3", "4"])

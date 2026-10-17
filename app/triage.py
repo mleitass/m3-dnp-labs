@@ -67,7 +67,9 @@ def load_config(config_dir: Path | None) -> TriageConfig:
         else:
             missing.append(name)
     if missing:
-        logger.warning("Triāžas konfigurācija nav pilna, trūkst: %s", ", ".join(missing))
+        logger.warning(
+            "Triāžas konfigurācija nav pilna, trūkst: %s", ", ".join(missing)
+        )
     prompt = files.get("prompt.txt", FALLBACK_PROMPT)
     try:
         departments = json.loads(files["routing.json"])["departments"]
@@ -88,7 +90,9 @@ def build_prompt(config: TriageConfig) -> str:
     return config.prompt.replace("{nodalas}", "\n".join(lines))
 
 
-def route(subject: str, body: str, config: TriageConfig, mode: str = "auto") -> RouteResult:
+def route(
+    subject: str, body: str, config: TriageConfig, mode: str = "auto"
+) -> RouteResult:
     if mode == "manual":
         return RouteResult(MANUAL_QUEUE, True, detail="manuāla sadale", manual=True)
     try:

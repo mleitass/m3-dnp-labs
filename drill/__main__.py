@@ -21,7 +21,9 @@ def _quiet_logs() -> None:
 def cmd_reset(_args) -> list[str]:
     summary = system.reset()
     return [
-        "Sākuma stāvoklis izveidots: " + clock.fmt_dt(summary["now"]) + ", pirms katastrofas.",
+        "Sākuma stāvoklis izveidots: "
+        + clock.fmt_dt(summary["now"])
+        + ", pirms katastrofas.",
         f"  Iesniegumi: {clock.fmt_int(summary['records'])}"
         f" · rezerves kopijas: {summary['backups']}",
         "Nākamais solis: make status",
@@ -106,7 +108,9 @@ def cmd_llm(args) -> list[str]:
     import mock_llm
 
     if args.mode not in mock_llm.MODES:
-        raise CommandError("Norādiet režīmu: make llm MODE=normal, down, slow vai alias")
+        raise CommandError(
+            "Norādiet režīmu: make llm MODE=normal, down, slow vai alias"
+        )
     current = _require_state()
     current["llm_mode"] = args.mode
     state.save(current)

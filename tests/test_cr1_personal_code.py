@@ -1,4 +1,4 @@
-"""CR-1: personas koda pārbaude (tracker/CR-1.md). Viena rinda = viens tests."""
+"""CR-1: personas koda pārbaude (C1 prasība no M1). Viena rinda = viens tests."""
 
 import pytest
 

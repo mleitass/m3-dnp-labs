@@ -59,8 +59,10 @@ def triage_line(current: dict) -> str:
 
     if runtime.triage_config_dir() is None:
         return "nav iespējama (serviss nedarbojas)"
-    mode = "manuāla sadale (Kanceleja)" if current.get("triage_mode") == "manual" else (
-        "automātiska sadale"
+    mode = (
+        "manuāla sadale (Kanceleja)"
+        if current.get("triage_mode") == "manual"
+        else ("automātiska sadale")
     )
     result = triage.self_test()
     if not result.ok:
@@ -91,7 +93,9 @@ def run() -> list[str]:
         total, newest_id, newest_at = facts
         lines.append(f"  Iesniegumi:          {clock.fmt_int(total)}")
         if newest_id:
-            lines.append(f"  Jaunākais ieraksts:  {newest_id}, {clock.fmt_dt(newest_at)}")
+            lines.append(
+                f"  Jaunākais ieraksts:  {newest_id}, {clock.fmt_dt(newest_at)}"
+            )
     lines.append(f"  Triāžas pašpārbaude: {triage_line(current)}")
     if paths.nas_dir().exists():
         lines += ["", "Rezerves kopijas: make backup-list"]

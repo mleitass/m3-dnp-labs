@@ -1,4 +1,4 @@
-"""CR-0: tēma "Parki un skvēri" un tēmu saraksts (tracker/CR-0.md)."""
+"""CR-0: tēma "Parki un skvēri" un tēmu saraksts (C1 prasība no M1)."""
 
 
 def test_cr0_ac1_topics_list(client):

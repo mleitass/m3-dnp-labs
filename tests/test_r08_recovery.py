@@ -125,7 +125,9 @@ def test_g3_restore_looks_successful_but_attachments_are_missing(sistema, capsys
     assert _has(out, "Datu zuduma logs", "30 h 40 min")
     assert _has(out, "Trūkst", "1 532")
     assert "PROBLĒMA  Trūkstošie pielikumi: 1 532" in out
-    listed = (paths.report_dir() / "trukstosie-pielikumi.csv").read_text(encoding="utf-8")
+    listed = (paths.report_dir() / "trukstosie-pielikumi.csv").read_text(
+        encoding="utf-8"
+    )
     assert listed.count("\n") == 1533
 
 
@@ -204,7 +206,9 @@ def test_new_submission_after_restore_reuses_a_lost_number(sistema, capsys):
 
     _start(capsys, 3)
     run(capsys, "restore", "--backup", "D-1")
-    app.dependency_overrides[get_omd] = lambda: lambda code: OmdCheck(OmdResult.NOT_ACTIVATED)
+    app.dependency_overrides[get_omd] = lambda: (
+        lambda code: OmdCheck(OmdResult.NOT_ACTIVATED)
+    )
     try:
         created = TestClient(app).post(
             "/submissions",

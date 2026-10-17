@@ -50,7 +50,9 @@ def restore(name: str) -> list[str]:
                 "(fails ir bojāts vai nepilnīgs).\nGalvenā servera stāvoklis nav mainīts."
             ) from None
         if not (unpacked / "db" / "iesniegumi.db").exists():
-            raise RecoveryError(f"Atjaunošana neizdevās: kopijā {entry['id']} nav datubāzes.")
+            raise RecoveryError(
+                f"Atjaunošana neizdevās: kopijā {entry['id']} nav datubāzes."
+            )
         for folder in SERVER_FOLDERS:
             (unpacked / folder).mkdir(exist_ok=True)
         target = paths.server_dir("primary")
@@ -68,7 +70,9 @@ def restore(name: str) -> list[str]:
         "Galvenais serveris darbojas, serviss palaists.",
     ]
     if was_standby:
-        lines.append("Serviss pārslēgts atpakaļ no rezerves servera uz galveno serveri.")
+        lines.append(
+            "Serviss pārslēgts atpakaļ no rezerves servera uz galveno serveri."
+        )
     return lines + ["Pārbaudiet rezultātu: make verify"]
 
 
@@ -96,7 +100,9 @@ def _active_triage_dir() -> Path:
     current = state.load()
     server = current["active"]
     if current["servers"].get(server) != state.SERVER_UP:
-        raise RecoveryError("Aktīvais serveris nedarbojas. Vispirms atjaunojiet servisu.")
+        raise RecoveryError(
+            "Aktīvais serveris nedarbojas. Vispirms atjaunojiet servisu."
+        )
     return paths.triage_dir(server)
 
 

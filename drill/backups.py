@@ -68,7 +68,9 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _add_bytes(archive: tarfile.TarFile, name: str, content: bytes, mtime: float) -> None:
+def _add_bytes(
+    archive: tarfile.TarFile, name: str, content: bytes, mtime: float
+) -> None:
     info = tarfile.TarInfo(name)
     info.size = len(content)
     info.mtime = mtime
@@ -83,9 +85,13 @@ def _write_archive(plan: Plan, scope: tuple[str, ...]) -> Path:
     with tempfile.TemporaryDirectory() as tmp:
         db_file = Path(tmp) / "iesniegumi.db"
         seed.write_database(db_file, records, snapshot_at=plan.created_at)
-        with target.open("wb") as raw, gzip.GzipFile(
-            filename="", mode="wb", fileobj=raw, mtime=int(mtime), compresslevel=1
-        ) as packed, tarfile.open(fileobj=packed, mode="w") as archive:
+        with (
+            target.open("wb") as raw,
+            gzip.GzipFile(
+                filename="", mode="wb", fileobj=raw, mtime=int(mtime), compresslevel=1
+            ) as packed,
+            tarfile.open(fileobj=packed, mode="w") as archive,
+        ):
             _add_bytes(archive, "db/iesniegumi.db", db_file.read_bytes(), mtime)
             if "attachments" in scope:
                 for name, content in seed.attachment_files(records):
@@ -93,7 +99,9 @@ def _write_archive(plan: Plan, scope: tuple[str, ...]) -> Path:
             if "triage" in scope:
                 version = triage_versions.version_at(plan.created_at)
                 for name, content in triage_versions.files(version).items():
-                    _add_bytes(archive, f"triage/{name}", content.encode("utf-8"), mtime)
+                    _add_bytes(
+                        archive, f"triage/{name}", content.encode("utf-8"), mtime
+                    )
     return target
 
 
@@ -122,10 +130,14 @@ def build_history(scope: tuple[str, ...] = SCOPE_FULL) -> None:
             f"{plan.created_at:%Y-%m-%d %H:%M}  OK         {plan.id}  "
             f"{size_gb} GB  sha256={digest}{note}"
         )
-    log.append(f"{FAILED_RUN:%Y-%m-%d %H:%M}  NEIZDEVĀS  darbs pārtraukts: {FAILED_REASON}")
+    log.append(
+        f"{FAILED_RUN:%Y-%m-%d %H:%M}  NEIZDEVĀS  darbs pārtraukts: {FAILED_REASON}"
+    )
     (nas / CATALOG).write_text(json.dumps(catalog, indent=2), encoding="utf-8")
     (nas / LOG).write_text("\n".join(log) + "\n", encoding="utf-8")
-    included = "\n".join(f"  - {SCOPE_LABELS[part]}" for part in SCOPE_FULL if part in scope)
+    included = "\n".join(
+        f"  - {SCOPE_LABELS[part]}" for part in SCOPE_FULL if part in scope
+    )
     (nas / JOB).write_text(
         "# Rezerves kopēšanas darbs. NAS serveru telpā, katru nakti 02:00.\n"
         "avots: galvenais-serveris\n"
@@ -155,7 +167,10 @@ def find(name: str) -> dict:
     """Kopija pēc ID (B-20261018-0200) vai vecuma (D-1, D-7, D-30, D-365)."""
     wanted = name.strip().upper()
     for entry in catalog():
-        if wanted in (entry["id"].upper(), clock.day_offset(clock.parse(entry["created_at"]))):
+        if wanted in (
+            entry["id"].upper(),
+            clock.day_offset(clock.parse(entry["created_at"])),
+        ):
             return entry
     known = ", ".join(e["id"] for e in catalog())
     raise BackupError(f"Rezerves kopija '{name}' nav atrasta. Pieejamās: {known}")

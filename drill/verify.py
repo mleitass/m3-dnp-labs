@@ -142,7 +142,9 @@ def _write_missing_list(missing: list) -> str:
 def _records_section(findings: Findings, summary: list) -> list[str]:
     lines = ["Iesniegumi", _row("Gaidīti katastrofas brīdī", _count(findings.expected))]
     if not findings.readable:
-        summary.append(("PROBLĒMA", "Datubāze nav pieejama: neviens iesniegums nav atjaunots"))
+        summary.append(
+            ("PROBLĒMA", "Datubāze nav pieejama: neviens iesniegums nav atjaunots")
+        )
         return lines + [_row("Atjaunoti", "  nav (datubāze nav pieejama)")]
     lines += [
         _row("Atjaunoti", _count(findings.restored)),
@@ -150,7 +152,9 @@ def _records_section(findings: Findings, summary: list) -> list[str]:
         _row("Bojāti (saturs atšķiras)", _count(findings.corrupted)),
     ]
     if findings.extra_old:
-        lines.append(_row("Nav gaidīto sarakstā", _count(findings.extra_old) + "  (vecāki dati)"))
+        lines.append(
+            _row("Nav gaidīto sarakstā", _count(findings.extra_old) + "  (vecāki dati)")
+        )
     if findings.new_after:
         lines.append(_row("Jauni pēc katastrofas", _count(findings.new_after)))
     if findings.reused_ids:
@@ -158,7 +162,12 @@ def _records_section(findings: Findings, summary: list) -> list[str]:
             f"  Uzmanību: jauniem iesniegumiem piešķirti zaudēto numuri: {findings.reused_ids}"
         )
     if findings.corrupted:
-        summary.append(("PROBLĒMA", f"Iesniegumi ar bojātu saturu: {clock.fmt_int(findings.corrupted)}"))
+        summary.append(
+            (
+                "PROBLĒMA",
+                f"Iesniegumi ar bojātu saturu: {clock.fmt_int(findings.corrupted)}",
+            )
+        )
     else:
         summary.append(("OK", "Atjaunoto iesniegumu saturs nav bojāts"))
     return lines
@@ -176,9 +185,13 @@ def _loss_section(current: dict, findings: Findings, summary: list) -> list[str]
         lines.append(_row("Atjaunošanas punkts", clock.fmt_dt(point)))
     if findings.newest:
         newest_id, newest_at = findings.newest
-        lines.append(_row("Jaunākais atjaunotais", f"{newest_id}, {clock.fmt_dt(newest_at)}"))
+        lines.append(
+            _row("Jaunākais atjaunotais", f"{newest_id}, {clock.fmt_dt(newest_at)}")
+        )
     first, last = findings.lost[0][0], findings.lost[-1][0]
-    lines.append(_row("Zaudētie saņemti", f"{clock.fmt_dt(first)} – {clock.fmt_dt(last)}"))
+    lines.append(
+        _row("Zaudētie saņemti", f"{clock.fmt_dt(first)} – {clock.fmt_dt(last)}")
+    )
     window = clock.fmt_duration(clock.NOW - (point or findings.newest[1]))
     lines.append(_row("Datu zuduma logs", window))
     summary.append(
@@ -199,12 +212,21 @@ def _attachments_section(findings: Findings, summary: list) -> list[str]:
         _row("Bojāti", _count(findings.attachments_damaged)),
     ]
     if findings.attachments_missing:
-        lines.append(_row("Trūkstošo saraksts", _write_missing_list(findings.attachments_missing)))
+        lines.append(
+            _row(
+                "Trūkstošo saraksts", _write_missing_list(findings.attachments_missing)
+            )
+        )
         summary.append(
-            ("PROBLĒMA", f"Trūkstošie pielikumi: {clock.fmt_int(len(findings.attachments_missing))}")
+            (
+                "PROBLĒMA",
+                f"Trūkstošie pielikumi: {clock.fmt_int(len(findings.attachments_missing))}",
+            )
         )
     elif findings.attachments_damaged:
-        summary.append(("PROBLĒMA", f"Bojātie pielikumi: {findings.attachments_damaged}"))
+        summary.append(
+            ("PROBLĒMA", f"Bojātie pielikumi: {findings.attachments_damaged}")
+        )
     else:
         summary.append(("OK", "Pielikumi vietā, kontrolsummas atbilst"))
     return lines
@@ -232,22 +254,35 @@ def _triage_section(current: dict, summary: list) -> list[str]:
         f"slieksnis {result.threshold}/{result.total}"
     )
     lines += [
-        _row("Režīms", "manuāla sadale: visi jaunie → Kanceleja" if manual else "automātiska sadale"),
+        _row(
+            "Režīms",
+            "manuāla sadale: visi jaunie → Kanceleja"
+            if manual
+            else "automātiska sadale",
+        ),
         _row("Modelis", _model_text(config)),
         _row("Automātiskās sadales tests" if manual else "Novērtēšanas kopa", score),
     ]
     if result.errors:
-        lines.append(_row("MI pakalpojums neatbildēja", f"{result.errors} no {result.total}"))
+        lines.append(
+            _row("MI pakalpojums neatbildēja", f"{result.errors} no {result.total}")
+        )
     department, count = result.destinations.most_common(1)[0]
     if count >= 0.75 * result.total and not result.passed:
         name = triage.DEPARTMENT_NAMES.get(department, department)
         lines.append(f"  Uzmanību: {count} no {result.total} nosūtīti uz: {name}")
     if manual:
-        summary.append(("PIEZĪME", "Triāža manuālā režīmā: jaunos iesniegumus sadala Kanceleja"))
+        summary.append(
+            ("PIEZĪME", "Triāža manuālā režīmā: jaunos iesniegumus sadala Kanceleja")
+        )
     elif result.passed:
-        summary.append(("OK", f"Triāža sadala pareizi ({result.correct}/{result.total})"))
+        summary.append(
+            ("OK", f"Triāža sadala pareizi ({result.correct}/{result.total})")
+        )
     else:
-        summary.append(("PROBLĒMA", f"Triāža zem sliekšņa ({result.correct}/{result.total})"))
+        summary.append(
+            ("PROBLĒMA", f"Triāža zem sliekšņa ({result.correct}/{result.total})")
+        )
     return lines
 
 

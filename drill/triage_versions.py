@@ -50,7 +50,9 @@ ROUTING = {
     VENDOR: {
         "version": "2025-08-11",
         "departments": [
-            _department("UTILITIES", "Komunālā nodaļa", _UTILITIES + ["apkur", "siltum"]),
+            _department(
+                "UTILITIES", "Komunālā nodaļa", _UTILITIES + ["apkur", "siltum"]
+            ),
             _department("SOCIAL", "Sociālais dienests", _SOCIAL),
             _department("BUILDING", "Būvvalde", _BUILDING),
             _department("LANDSCAPING", "Labiekārtošanas nodaļa", _LANDSCAPING),

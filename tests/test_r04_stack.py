@@ -54,7 +54,9 @@ def test_data_is_synthetic():
 
 
 def test_dataset_is_deterministic():
-    first = seed._generate(seed.OPERATIVE_START, NOW, 2026, seed.random.Random(seed.SEED))
+    first = seed._generate(
+        seed.OPERATIVE_START, NOW, 2026, seed.random.Random(seed.SEED)
+    )
     operative, _ = seed.dataset()
     assert [r.row for r in first] == [r.row for r in operative]
 
@@ -86,7 +88,12 @@ def test_vendor_copy_fixed_by_hand_reaches_baseline(sistema):
     vendor = _config(triage_versions.VENDOR)
     departments = [dict(d) for d in vendor.departments]
     social = next(d for d in departments if d["code"] == "SOCIAL")
-    social["keywords"] = ["apkures pabalst", "apkures atbalst", "kompensāc", *social["keywords"]]
+    social["keywords"] = [
+        "apkures pabalst",
+        "apkures atbalst",
+        "kompensāc",
+        *social["keywords"],
+    ]
     departments.remove(social)
     fixed = triage.TriageConfig(vendor.prompt, [social, *departments], vendor.settings)
     assert evaluation.evaluate(fixed).correct == 19
@@ -106,13 +113,17 @@ def test_pinned_model_is_not_affected_by_alias_change(sistema):
     state.save(current)
     config = _config(triage_versions.CURRENT)
     pinned = triage.TriageConfig(
-        config.prompt, config.departments, {**config.settings, "model": "ezer-llm-2026-06"}
+        config.prompt,
+        config.departments,
+        {**config.settings, "model": "ezer-llm-2026-06"},
     )
     assert evaluation.evaluate(pinned).correct == 19
 
 
 def test_manual_mode_routes_to_chancery_queue():
-    result = triage.route("Apkures pabalsts", "Lūdzu.", _config(triage_versions.CURRENT), "manual")
+    result = triage.route(
+        "Apkures pabalsts", "Lūdzu.", _config(triage_versions.CURRENT), "manual"
+    )
     assert (result.department, result.manual) == ("CHANCERY", True)
 
 
@@ -138,7 +149,9 @@ def test_new_submission_is_routed_on_the_system(sistema):
     from app.main import app, get_omd
     from app.omd_client import OmdCheck, OmdResult
 
-    app.dependency_overrides[get_omd] = lambda: lambda code: OmdCheck(OmdResult.NOT_ACTIVATED)
+    app.dependency_overrides[get_omd] = lambda: (
+        lambda code: OmdCheck(OmdResult.NOT_ACTIVATED)
+    )
     try:
         client = TestClient(app)
         created = client.post(

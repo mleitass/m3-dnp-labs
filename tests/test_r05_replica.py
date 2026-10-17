@@ -11,7 +11,9 @@ from tests.drill_helpers import run
 def _count(server, where="1=1"):
     conn = sqlite3.connect(paths.db_path(server))
     try:
-        return conn.execute(f"SELECT COUNT(*) FROM submissions WHERE {where}").fetchone()[0]
+        return conn.execute(
+            f"SELECT COUNT(*) FROM submissions WHERE {where}"
+        ).fetchone()[0]
     finally:
         conn.close()
 
@@ -21,7 +23,9 @@ def test_standby_is_synced_every_15_minutes(sistema, capsys):
     assert current["standby_synced_at"] == "2026-10-19T08:30:00+03:00"
     assert _count("standby") < _count("primary")
     _code, out = run(capsys, "status")
-    assert "Rezerves serveris:   darbojas, sinhronizēts pirmdiena 19.10.2026 08:30" in out
+    assert (
+        "Rezerves serveris:   darbojas, sinhronizēts pirmdiena 19.10.2026 08:30" in out
+    )
 
 
 def test_replicate_copies_primary(sistema, capsys):

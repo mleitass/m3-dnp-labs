@@ -1,4 +1,4 @@
-"""CR-2: atbildes kanāla pārbaude OMD reģistrā (tracker/CR-2.md)."""
+"""CR-2: atbildes kanāla pārbaude OMD reģistrā (C1 prasība no M1)."""
 
 import logging
 

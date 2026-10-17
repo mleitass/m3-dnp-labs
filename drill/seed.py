@@ -194,8 +194,10 @@ def content_hash(row: dict) -> str:
 
 def attachment_bytes(submission_id: str, filename: str, size: int) -> bytes:
     rng = random.Random(f"{submission_id}/{filename}")
-    header = b"\xff\xd8\xff\xe0" if filename.endswith(".jpg") else (
-        b"%PDF-1.4\n% Sintetisks pielikums macibam\n"
+    header = (
+        b"\xff\xd8\xff\xe0"
+        if filename.endswith(".jpg")
+        else (b"%PDF-1.4\n% Sintetisks pielikums macibam\n")
     )
     return header + rng.randbytes(size - len(header))
 
@@ -207,7 +209,9 @@ def _persons() -> list[tuple[str, str, str]]:
         first, gender = rng.choice(FIRST_NAMES)
         surname = rng.choice(SURNAMES)[0 if gender == "m" else 1]
         code = f"3200000{1000 + number:04d}"
-        persons.append((code, f"{first} {surname}", f"iedzivotajs{1000 + number}@example.com"))
+        persons.append(
+            (code, f"{first} {surname}", f"iedzivotajs{1000 + number}@example.com")
+        )
     return persons
 
 
@@ -253,8 +257,10 @@ def _timestamps(start: datetime, end: datetime, rng: random.Random) -> list[date
         share = (hour_end - moment) / timedelta(hours=1)
         carry += (
             _weekly(moment)
-            * DAY_WEIGHTS[moment.weekday()] / day_total
-            * HOUR_WEIGHTS[moment.hour] / hour_total
+            * DAY_WEIGHTS[moment.weekday()]
+            / day_total
+            * HOUR_WEIGHTS[moment.hour]
+            / hour_total
             * share
         )
         count = int(carry)
@@ -282,7 +288,9 @@ def _topic(category: str, moment: datetime, rng: random.Random) -> str:
     if correct == "HEATING_SUPPORT":
         if moment < HEATING_TOPIC_FROM:
             return rng.choices(("OTHER", rng.choice(WRONG_TOPICS)), (85, 15))[0]
-        return rng.choices(("HEATING_SUPPORT", "OTHER", rng.choice(WRONG_TOPICS)), (55, 35, 10))[0]
+        return rng.choices(
+            ("HEATING_SUPPORT", "OTHER", rng.choice(WRONG_TOPICS)), (55, 35, 10)
+        )[0]
     return rng.choices((correct, "OTHER", rng.choice(WRONG_TOPICS)), (80, 15, 5))[0]
 
 
@@ -361,7 +369,9 @@ def records_until(moment: datetime) -> list:
     return [r for r in source if r.received_at <= moment]
 
 
-def write_database(path: Path, records: list, snapshot_at: datetime | None = None) -> None:
+def write_database(
+    path: Path, records: list, snapshot_at: datetime | None = None
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
         path.unlink()
@@ -370,7 +380,11 @@ def write_database(path: Path, records: list, snapshot_at: datetime | None = Non
     storage.insert_rows(conn, [{**r.row, "seq": r.seq} for r in records])
     conn.executemany(
         "INSERT INTO attachments VALUES (?, ?, ?, ?)",
-        [(r.id, name, size, digest) for r in records for name, size, digest in r.attachments],
+        [
+            (r.id, name, size, digest)
+            for r in records
+            for name, size, digest in r.attachments
+        ],
     )
     meta = {"system": 'Ezermalas novada pašvaldība · e-pakalpojums "Iesniegumi"'}
     if snapshot_at:
@@ -389,8 +403,9 @@ def attachment_files(records: list):
     """(faila nosaukums mapē pielikumi/, saturs) katram pielikumam."""
     for record in records:
         for filename, size, _digest in record.attachments:
-            yield attachment_name(record.id, filename), attachment_bytes(
-                record.id, filename, size
+            yield (
+                attachment_name(record.id, filename),
+                attachment_bytes(record.id, filename, size),
             )
 
 

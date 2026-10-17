@@ -30,7 +30,9 @@ def test_reset_after_disaster_restores_identical_clean_state(sistema, capsys):
     assert current["scenario"] is None
     assert current["active"] == "primary"
     assert current["servers"] == {"primary": "up", "standby": "up"}
-    assert (paths.sim_dir() / "gaidits.json").read_text(encoding="utf-8") == expected_before
+    assert (paths.sim_dir() / "gaidits.json").read_text(
+        encoding="utf-8"
+    ) == expected_before
     assert not (paths.root() / "saglabats").exists()
     _code, verify = run(capsys, "verify")
     assert "PROBLĒMA" not in verify
