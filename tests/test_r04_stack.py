@@ -81,6 +81,17 @@ def test_vendor_copy_misroutes_heating_support(sistema):
     assert not result.passed
 
 
+def test_vendor_copy_fixed_by_hand_reaches_baseline(sistema):
+    """G4 papildu ceļš: SOCIAL pazīmes papildina un SOCIAL liek pirmo."""
+    vendor = _config(triage_versions.VENDOR)
+    departments = [dict(d) for d in vendor.departments]
+    social = next(d for d in departments if d["code"] == "SOCIAL")
+    social["keywords"] = ["apkures pabalst", "apkures atbalst", "kompensāc", *social["keywords"]]
+    departments.remove(social)
+    fixed = triage.TriageConfig(vendor.prompt, [social, *departments], vendor.settings)
+    assert evaluation.evaluate(fixed).correct == 19
+
+
 @pytest.mark.parametrize(("mode", "correct"), [("alias", 14), ("down", 2), ("slow", 2)])
 def test_provider_failure_modes(sistema, mode, correct):
     current = state.load()
