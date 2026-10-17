@@ -61,6 +61,47 @@ def cmd_replicate(_args) -> list[str]:
         raise CommandError(str(exc)) from exc
 
 
+def _recovery(action, *params) -> list[str]:
+    from drill import recovery
+
+    _require_state()
+    try:
+        return action(*params)
+    except recovery.RecoveryError as exc:
+        raise CommandError(str(exc)) from exc
+
+
+def cmd_restore(args) -> list[str]:
+    from drill import recovery
+
+    return _recovery(recovery.restore, args.backup)
+
+
+def cmd_failover(_args) -> list[str]:
+    from drill import recovery
+
+    return _recovery(recovery.failover)
+
+
+def cmd_triage(args) -> list[str]:
+    from drill import recovery
+
+    return _recovery(recovery.set_triage_mode, args.mode)
+
+
+def cmd_triage_config(_args) -> list[str]:
+    from drill import recovery
+
+    return _recovery(recovery.vendor_triage_config)
+
+
+def cmd_verify(_args) -> list[str]:
+    from drill import verify
+
+    _require_state()
+    return verify.run()
+
+
 def cmd_llm(args) -> list[str]:
     import mock_llm
 
@@ -85,7 +126,12 @@ COMMANDS = {
     "status": cmd_status,
     "katastrofa": cmd_katastrofa,
     "backup-list": cmd_backup_list,
+    "restore": cmd_restore,
+    "failover": cmd_failover,
     "replicate": cmd_replicate,
+    "verify": cmd_verify,
+    "triage": cmd_triage,
+    "triage-config": cmd_triage_config,
     "llm": cmd_llm,
 }
 
