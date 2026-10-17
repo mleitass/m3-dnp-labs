@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(rm:*)",
+      "Edit(sistema/nas/**)",
+      "Write(sistema/nas/**)",
+      "Read(sistema/.simulacija/**)",
+      "Read(drill/**)",
+      "Read(mock_llm/**)"
+    ]
+  }
+}

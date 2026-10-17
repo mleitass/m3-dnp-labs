@@ -3,7 +3,7 @@
 Visi dati ir izdomāti. Personas kodi ir acīmredzami viltoti (3200000NNNN),
 uzvārdi ir izdomāti, e-pasti ir example.com domēnā.
 
-Apjomi: parasti 300 iesniegumu nedēļā, apkures pabalsta pieteikšanās laikā
+Iesniegumu skaits: parasti 300 nedēļā, apkures pabalsta pieteikšanās laikā
 (no 12.10.2026) ap 1200 nedēļā, no tiem ap 70 % par apkures pabalstu.
 Darba dienās vairāk nekā brīvdienās, darba laikā vairāk nekā naktī.
 """
