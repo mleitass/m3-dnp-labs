@@ -225,8 +225,11 @@ def triage_config(version: str) -> triage.TriageConfig:
     )
 
 
-def _route(subject: str, body: str, moment: datetime) -> str:
-    config = triage_config(triage_versions.version_at(moment))
+def _route(subject: str, body: str, moment: datetime) -> str | None:
+    version = triage_versions.version_at(moment)
+    if version is None:  # pirms triāžas ieviešanas nodaļu triāža nenoteica
+        return None
+    config = triage_config(version)
     return mock_llm.classify(triage.build_prompt(config), f"{subject}\n{body}")
 
 

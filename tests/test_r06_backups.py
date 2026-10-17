@@ -41,6 +41,13 @@ def test_full_scope_contains_db_attachments_and_triage(sistema):
     assert "triage/prompt.txt" in names
 
 
+def test_year_old_backup_predates_the_triage(sistema):
+    assert not any(n.startswith("triage/") for n in _members("B-20251019-0200"))
+    with tarfile.open(backups.archive_path("B-20260919-0200")) as archive:
+        routing = archive.extractfile("triage/routing.json").read().decode("utf-8")
+    assert '"version": "2026-04-14"' in routing
+
+
 @pytest.mark.parametrize(
     ("scope", "present", "absent"),
     [

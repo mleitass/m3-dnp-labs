@@ -156,7 +156,7 @@ def test_g4_manual_mode_then_vendor_copy(sistema, capsys):
     assert "PIEZĪME   Triāža manuālā režīmā" in out
     code, out = run(capsys, "triage-config")
     assert code == 0
-    assert "2025. gada augusta" in out
+    assert "2026. gada aprīļa" in out
     out = _verify(capsys)
     assert _has(out, "Automātiskās sadales tests", "14/20 pareizi (70 %)")
     code, out = run(capsys, "triage-config")
@@ -184,7 +184,8 @@ def test_restore_of_year_old_backup_reports_old_data(sistema, capsys):
     out = _verify(capsys)
     assert _has(out, "Atjaunoti", "0\n")
     assert _has(out, "Nav gaidīto sarakstā", "")
-    assert "PROBLĒMA  Triāža zem sliekšņa (14/20)" in out
+    # Pirms gada triāžas vēl nebija (ieviesta 14.04.2026): kopijā nav konfigurācijas.
+    assert "PROBLĒMA  Triāža zem sliekšņa (2/20)" in out
 
 
 @pytest.mark.parametrize("group", [1, 2, 3, 4])

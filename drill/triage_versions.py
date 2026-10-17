@@ -1,8 +1,9 @@
 """Triāžas konfigurācijas versijas. Simulācijas dati, nav atjaunošanas avots.
 
-- 2025-08: sākotnējā ieviešana, SIA "Ezerdati" nodošanas pakete.
+- 2026-04: ieviešana (14.04.2026), SIA "Ezerdati" nodošanas pakete.
 - 2026-09: pašvaldības labojums apkures pabalsta pieteikšanās laikam
   (apkures pabalsts pāriet no Komunālās nodaļas uz Sociālo dienestu).
+Pirms ieviešanas triāžas nebija: iesniegumus nodaļām sadalīja Kanceleja.
 """
 
 import json
@@ -11,7 +12,8 @@ from datetime import datetime
 from drill.clock import TZ
 
 CURRENT = "2026-09"
-VENDOR = "2025-08"
+VENDOR = "2026-04"
+GO_LIVE = datetime(2026, 4, 14, tzinfo=TZ)
 CURRENT_FROM = datetime(2026, 9, 28, tzinfo=TZ)
 
 _PROMPT_HEAD = (
@@ -48,7 +50,7 @@ def _department(code: str, name: str, keywords: list) -> dict:
 
 ROUTING = {
     VENDOR: {
-        "version": "2025-08-11",
+        "version": "2026-04-14",
         "departments": [
             _department(
                 "UTILITIES", "Komunālā nodaļa", _UTILITIES + ["apkur", "siltum"]
@@ -86,7 +88,10 @@ SETTINGS = {
 }
 
 
-def version_at(moment: datetime) -> str:
+def version_at(moment: datetime) -> str | None:
+    """Konfigurācijas versija brīdī moment; None pirms triāžas ieviešanas."""
+    if moment < GO_LIVE:
+        return None
     return CURRENT if moment >= CURRENT_FROM else VENDOR
 
 

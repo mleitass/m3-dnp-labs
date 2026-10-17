@@ -83,6 +83,31 @@ def test_vendor_copy_misroutes_heating_support(sistema):
     assert not result.passed
 
 
+def test_vendor_copy_is_the_april_2026_go_live_package():
+    assert triage_versions.ROUTING[triage_versions.VENDOR]["version"] == "2026-04-14"
+    assert triage_versions.version_at(datetime(2025, 10, 19, tzinfo=TZ)) is None
+    assert triage_versions.version_at(datetime(2026, 9, 19, tzinfo=TZ)) == "2026-04"
+    assert triage_versions.version_at(datetime(2026, 10, 18, tzinfo=TZ)) == "2026-09"
+
+
+def test_vendor_copy_misses_are_mostly_heating_support():
+    items, _threshold = evaluation.load_items()
+    config = _config(triage_versions.VENDOR)
+    misses = [
+        item
+        for item in items
+        if triage.route(item["subject"], item["body"], config).department
+        != item["expected"]
+    ]
+    heating = [m for m in misses if "apkur" in (m["subject"] + m["body"]).lower()]
+    assert (len(misses), len(heating)) == (6, 5)
+
+
+def test_records_before_go_live_have_no_triage_department():
+    _operative, year_ago = seed.dataset()
+    assert all(r.row["department"] is None for r in year_ago)
+
+
 def test_vendor_copy_fixed_by_hand_reaches_baseline(sistema):
     """G4 papildu ceļš: SOCIAL pazīmes papildina un SOCIAL liek pirmo."""
     vendor = _config(triage_versions.VENDOR)

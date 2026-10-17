@@ -135,16 +135,16 @@ def set_triage_mode(mode: str) -> list[str]:
 
 
 def vendor_triage_config() -> list[str]:
-    """SIA "Ezerdati" atsūta konfigurāciju no nodošanas dokumentācijas (2025-08)."""
+    """SIA "Ezerdati" atsūta konfigurāciju no ieviešanas nodošanas paketes (2026-04)."""
     config_dir = _active_triage_dir()
     present = [name for name in triage_versions.files(triage_versions.VENDOR)
                if (config_dir / name).exists()]  # fmt: skip
     if len(present) == 3:
         return ["Triāžas konfigurācija serverī jau ir. Nekas nav mainīts."]
     seed.write_triage(config_dir, triage_versions.VENDOR)
-    state.log_action("triage-config (piegādātāja kopija 2025-08)")
+    state.log_action("triage-config (piegādātāja kopija 2026-04)")
     return [
-        'SIA "Ezerdati" atsūtīja triāžas konfigurācijas kopiju no 2025. gada augusta',
+        'SIA "Ezerdati" atsūtīja triāžas konfigurācijas kopiju no 2026. gada aprīļa',
         "nodošanas dokumentācijas. Uzstādīts serverī: prompt.txt, routing.json, config.json.",
         "Īstenībā tas nozīmē sazināties ar piegādātāju (skatiet ilguma kartīti).",
         "Pirms paļaujaties uz automātisko sadali, pārbaudiet: make verify",

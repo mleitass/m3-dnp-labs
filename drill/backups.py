@@ -96,8 +96,8 @@ def _write_archive(plan: Plan, scope: tuple[str, ...]) -> Path:
             if "attachments" in scope:
                 for name, content in seed.attachment_files(records):
                     _add_bytes(archive, f"pielikumi/{name}", content, mtime)
-            if "triage" in scope:
-                version = triage_versions.version_at(plan.created_at)
+            version = triage_versions.version_at(plan.created_at)
+            if "triage" in scope and version:  # pirms ieviešanas triāžas nav
                 for name, content in triage_versions.files(version).items():
                     _add_bytes(
                         archive, f"triage/{name}", content.encode("utf-8"), mtime
