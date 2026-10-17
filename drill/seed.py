@@ -11,6 +11,7 @@ Darba dienās vairāk nekā brīvdienās, darba laikā vairāk nekā naktī.
 import hashlib
 import json
 import random
+import shutil
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -397,7 +398,9 @@ def write_server(
     server_dir: Path, records: list, triage_version: str | None,
     snapshot_at: datetime | None = None,
 ) -> None:  # fmt: skip
-    """Servera disks: datubāze, pielikumi un triāžas konfigurācija."""
+    """Servera disks: datubāze, pielikumi un triāžas konfigurācija (no tukšas mapes)."""
+    if server_dir.exists():
+        shutil.rmtree(server_dir)
     write_database(server_dir / "db" / "iesniegumi.db", records, snapshot_at)
     folder = server_dir / "pielikumi"
     folder.mkdir(parents=True, exist_ok=True)

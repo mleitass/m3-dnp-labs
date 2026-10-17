@@ -41,6 +41,16 @@ def cmd_status(_args) -> list[str]:
     return status.run()
 
 
+def cmd_katastrofa(args) -> list[str]:
+    from drill import scenarios
+
+    _require_state()
+    try:
+        return scenarios.start(args.group)
+    except scenarios.ScenarioError as exc:
+        raise CommandError(str(exc)) from exc
+
+
 def cmd_replicate(_args) -> list[str]:
     from drill import replica
 
@@ -73,6 +83,7 @@ def _require_state() -> dict:
 COMMANDS = {
     "reset": cmd_reset,
     "status": cmd_status,
+    "katastrofa": cmd_katastrofa,
     "backup-list": cmd_backup_list,
     "replicate": cmd_replicate,
     "llm": cmd_llm,

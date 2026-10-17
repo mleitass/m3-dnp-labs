@@ -5,13 +5,16 @@ DRILL := $(PY) -m drill
 export PYTHONIOENCODING := utf-8
 
 .DEFAULT_GOAL := help
-.PHONY: help status backup-list replicate reset run test llm
+.PHONY: help status katastrofa backup-list replicate reset run test llm
 
 help: ## Parāda komandas
 	@awk -F ':.*## ' '/^[a-zA-Z_%-]+:.*## / {printf "  make %-22s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 status: ## Sistēmas stāvoklis: portāls, serveri, iesniegumi, triāža
 	@$(DRILL) status
+
+katastrofa: ## Sāk jūsu grupas katastrofu: make katastrofa GROUP=1 (1, 2, 3 vai 4)
+	@$(DRILL) katastrofa --group "$(GROUP)"
 
 backup-list: ## Rezerves kopiju saraksts: laiks, izmērs, kontrolsumma, žurnāls
 	@$(DRILL) backup-list
