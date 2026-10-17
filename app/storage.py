@@ -1,10 +1,16 @@
-"""Iesniegumu glabātuve: SQLite datubāze atmiņā.
+"""Iesniegumu glabātuve: SQLite.
 
-Pēc restarta dati atgriežas sākuma stāvoklī ar trim sintētiskiem iesniegumiem.
+Divi režīmi:
+- sistēma (noklusējums): datubāzes fails aktīvajā serverī mapē sistema/.
+  Ja serveris nedarbojas vai datubāzes nav, glabātuve ziņo ServiceUnavailable.
+- atmiņa: testiem. reset() izveido datubāzi atmiņā ar trim sintētiskiem iesniegumiem.
 """
 
 import sqlite3
 import threading
+from contextlib import contextmanager
+
+from drill import runtime
 
 COLUMNS = (
     "id",
@@ -20,14 +26,46 @@ COLUMNS = (
     "dueDate",
     "replyChannel",
     "reasonCode",
+    "department",
 )
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS submissions (
+    seq INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT UNIQUE NOT NULL,
+    personalCode TEXT NOT NULL,
+    fullName TEXT NOT NULL,
+    email TEXT NOT NULL,
+    preferredChannel TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    status TEXT NOT NULL,
+    receivedAt TEXT NOT NULL,
+    dueDate TEXT NOT NULL,
+    replyChannel TEXT NOT NULL,
+    reasonCode TEXT,
+    department TEXT
+);
+CREATE TABLE IF NOT EXISTS attachments (
+    submission_id TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    sha256 TEXT NOT NULL,
+    PRIMARY KEY (submission_id, filename)
+);
+CREATE TABLE IF NOT EXISTS meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+"""
 
 # Sintētiski dati. Personas kodi neatbilst reālām personām.
 SEED = (
     {
         "personalCode": "32000000101",
-        "fullName": "Jānis Bērziņš",
-        "email": "janis.berzins@example.com",
+        "fullName": "Jānis Paraudziņš",
+        "email": "janis.paraudzins@example.com",
         "preferredChannel": "EMAIL",
         "topic": "ROADS",
         "subject": "Bedre Ezera ielā",
@@ -37,11 +75,12 @@ SEED = (
         "dueDate": "2026-11-02",
         "replyChannel": "EMAIL",
         "reasonCode": None,
+        "department": "UTILITIES",
     },
     {
         "personalCode": "32000000102",
-        "fullName": "Līga Ozoliņa-Kalniņa",
-        "email": "liga.ozolina@example.com",
+        "fullName": "Līga Testiņa-Izdomātā",
+        "email": "liga.testina@example.com",
         "preferredChannel": "POST",
         "topic": "PLANNING",
         "subject": "Bojāta uzbrauktuve pie bibliotēkas",
@@ -54,11 +93,12 @@ SEED = (
         "dueDate": "2026-09-21",
         "replyChannel": "POST",
         "reasonCode": None,
+        "department": "BUILDING",
     },
     {
         "personalCode": "32000000103",
-        "fullName": "Ņikita Šķēle",
-        "email": "nikita.skele@example.com",
+        "fullName": "Ņikita Ezermalnieks",
+        "email": "nikita.ezermalnieks@example.com",
         "preferredChannel": "E_ADDRESS",
         "topic": "WASTE",
         "subject": "Atkritumu konteiners netiek iztukšots",
@@ -68,69 +108,89 @@ SEED = (
         "dueDate": "2026-10-01",
         "replyChannel": "E_ADDRESS",
         "reasonCode": None,
+        "department": "UTILITIES",
     },
 )
 
-_INSERT = """
-    INSERT INTO submissions (
-        id, personalCode, fullName, email, preferredChannel, topic, subject, body,
-        status, receivedAt, dueDate, replyChannel, reasonCode
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+_INSERT = f"""
+    INSERT INTO submissions (seq, {", ".join(COLUMNS)})
+    VALUES (?, {", ".join("?" for _ in COLUMNS)})
 """
 
+
+class ServiceUnavailable(Exception):
+    """Datubāze nav pieejama: serveris nedarbojas vai fails ir bojāts."""
+
+
 _lock = threading.Lock()
-_conn: sqlite3.Connection | None = None
+_memory: sqlite3.Connection | None = None
 
 
-def _connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(":memory:", check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    conn.execute(
-        """
-        CREATE TABLE submissions (
-            seq INTEGER PRIMARY KEY AUTOINCREMENT,
-            id TEXT UNIQUE NOT NULL,
-            personalCode TEXT NOT NULL,
-            fullName TEXT NOT NULL,
-            email TEXT NOT NULL,
-            preferredChannel TEXT NOT NULL,
-            topic TEXT NOT NULL,
-            subject TEXT NOT NULL,
-            body TEXT NOT NULL,
-            status TEXT NOT NULL,
-            receivedAt TEXT NOT NULL,
-            dueDate TEXT NOT NULL,
-            replyChannel TEXT NOT NULL,
-            reasonCode TEXT
-        )
-        """
-    )
-    return conn
+def use_system() -> None:
+    """Glabātuve izmanto aktīvā servera datubāzi (mācību sistēmu)."""
+    global _memory
+    with _lock:
+        _memory = None
 
 
 def reset(seed: bool = True) -> None:
-    global _conn
+    """Testiem: tukša datubāze atmiņā, pēc izvēles ar trim sintētiskiem iesniegumiem."""
+    global _memory
+    conn = sqlite3.connect(":memory:", check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    conn.executescript(SCHEMA)
     with _lock:
-        _conn = _connect()
+        _memory = conn
     if seed:
         for record in SEED:
             add(record)
 
 
-def add(data: dict) -> dict:
+@contextmanager
+def _connection():
     with _lock:
-        (seq,) = _conn.execute(
+        if _memory is not None:
+            yield _memory
+            _memory.commit()
+            return
+        try:
+            path = runtime.active_db_path()
+        except runtime.Unavailable as exc:
+            raise ServiceUnavailable(str(exc)) from exc
+        conn = sqlite3.connect(f"file:{path}?mode=rw", uri=True)
+        conn.row_factory = sqlite3.Row
+        try:
+            yield conn
+            conn.commit()
+        except sqlite3.DatabaseError as exc:
+            raise ServiceUnavailable("datubāze nav nolasāma") from exc
+        finally:
+            conn.close()
+
+
+def insert_rows(conn: sqlite3.Connection, records) -> None:
+    """Ieraksti ar zināmu kārtas numuru (seq). Izmanto arī datu ģenerators."""
+    conn.executemany(
+        _INSERT,
+        [[r["seq"], *(r.get(column) for column in COLUMNS)] for r in records],
+    )
+
+
+def add(data: dict) -> dict:
+    with _connection() as conn:
+        (seq,) = conn.execute(
             "SELECT COALESCE(MAX(seq), 0) + 1 FROM submissions"
         ).fetchone()
-        record = {**data, "id": f"IES-2026-{seq:06d}"}
-        _conn.execute(_INSERT, [record.get(column) for column in COLUMNS])
+        record = {**data, "id": f"IES-2026-{seq:06d}", "seq": seq}
+        insert_rows(conn, [record])
+    record.pop("seq")
     return record
 
 
 def list_submissions(status: str | None = None, topic: str | None = None) -> list:
     # Parametrizēts vaicājums: ievade nekad nekļūst par SQL daļu.
-    with _lock:
-        rows = _conn.execute(
+    with _connection() as conn:
+        rows = conn.execute(
             """
             SELECT * FROM submissions
             WHERE (:status IS NULL OR status = :status)
@@ -143,10 +203,17 @@ def list_submissions(status: str | None = None, topic: str | None = None) -> lis
 
 
 def get(submission_id: str) -> dict | None:
-    with _lock:
-        row = _conn.execute(
+    with _connection() as conn:
+        row = conn.execute(
             "SELECT * FROM submissions WHERE id = ?", (submission_id,)
         ).fetchone()
     if row is None:
         return None
     return {column: row[column] for column in COLUMNS}
+
+
+def count() -> int:
+    """Veselības pārbaudei: vai datubāzi var nolasīt."""
+    with _connection() as conn:
+        (total,) = conn.execute("SELECT COUNT(*) FROM submissions").fetchone()
+    return total

@@ -10,7 +10,7 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import omd_client, storage
+from app import omd_client, storage, triage
 from app.errors import SubmissionNotFound, register_error_handlers
 from app.models import (
     Error,
@@ -33,6 +33,7 @@ TOPIC_NAMES = {
     Topic.WASTE: "Atkritumi",
     Topic.PLANNING: "Teritorijas plānošana",
     Topic.PARKS: "Parki un skvēri",
+    Topic.HEATING_SUPPORT: "Apkures pabalsts",
     Topic.OTHER: "Cits",
 }
 REPLY_DAYS = 30  # Vienkāršots termiņš: 30 kalendāra dienas
@@ -43,7 +44,7 @@ logger = logging.getLogger("ezermala.submissions")
 
 app = FastAPI(title="Ezermalas pieteikumu sistēma · iesniegumu API", version=VERSION)
 register_error_handlers(app)
-storage.reset()
+storage.use_system()
 
 
 OmdLookup = Callable[[str], omd_client.OmdCheck]
@@ -73,6 +74,7 @@ def root() -> RedirectResponse:
 
 @app.get("/health", response_model=Health, tags=["Sistēma"])
 def get_health() -> Health:
+    storage.count()  # M3: ja datubāze nav pieejama, atbilde ir 503
     return Health(status="ok", version=VERSION)
 
 
@@ -95,6 +97,7 @@ def create_submission(
     received_at = datetime.now(timezone.utc).replace(microsecond=0)
     check = omd(data.personalCode)
     reply_channel, reason = decide_reply_channel(data.preferredChannel, check)
+    routing = triage.route_new(data.subject, data.body)
 
     record = storage.add(
         {
@@ -104,6 +107,7 @@ def create_submission(
             "dueDate": (received_at.date() + timedelta(days=REPLY_DAYS)).isoformat(),
             "replyChannel": reply_channel.value,
             "reasonCode": reason.value if reason else None,
+            "department": routing.department,
         }
     )
     # Žurnālā tikai iesnieguma ID un iemesls. Nekad personas kods vai teksts.

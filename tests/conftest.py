@@ -1,9 +1,15 @@
-import pytest
-from fastapi.testclient import TestClient
+import os
+import tempfile
 
-from app import storage
-from app.main import app, get_omd
-from app.omd_client import OmdCheck, OmdResult
+# Testi nekad neaiztiek grupas mācību sistēmu mapē sistema/.
+os.environ["EZERMALA_SISTEMA"] = tempfile.mkdtemp(prefix="ezermala-tests-")
+
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+
+from app import storage  # noqa: E402
+from app.main import app, get_omd  # noqa: E402
+from app.omd_client import OmdCheck, OmdResult  # noqa: E402
 
 
 class FakeOmd:
@@ -24,6 +30,17 @@ def fake_omd():
 
 
 @pytest.fixture
+def sistema(tmp_path, monkeypatch):
+    """Svaiga mācību sistēma pagaidu mapē (tāpat kā pēc make reset)."""
+    from drill import system
+
+    monkeypatch.setenv("EZERMALA_SISTEMA", str(tmp_path / "sistema"))
+    storage.use_system()
+    system.reset()
+    return tmp_path / "sistema"
+
+
+@pytest.fixture
 def client(fake_omd):
     storage.reset(seed=False)
     app.dependency_overrides[get_omd] = lambda: fake_omd
@@ -36,7 +53,7 @@ def valid_payload():
     # Sintētiski dati
     return {
         "personalCode": "32000000101",
-        "fullName": "Līga Ozoliņa-Kalniņa",
+        "fullName": "Līga Testiņa-Izdomātā",
         "email": "liga@example.com",
         "preferredChannel": "EMAIL",
         "topic": "ROADS",

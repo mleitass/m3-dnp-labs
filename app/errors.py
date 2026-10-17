@@ -4,6 +4,8 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.storage import ServiceUnavailable
+
 
 class SubmissionNotFound(Exception):
     pass
@@ -44,6 +46,11 @@ def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(SubmissionNotFound)
     async def not_found(request: Request, exc: SubmissionNotFound):
         return error_response(404, "NOT_FOUND", "Submission not found")
+
+    @app.exception_handler(ServiceUnavailable)
+    async def service_unavailable(request: Request, exc: ServiceUnavailable):
+        # M3: serveris vai datubāze nav pieejama (mācību katastrofa).
+        return error_response(503, "SERVICE_UNAVAILABLE", "Service unavailable")
 
     @app.exception_handler(Exception)
     async def unexpected_error(request: Request, exc: Exception):

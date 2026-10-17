@@ -34,6 +34,7 @@ class Topic(str, Enum):
     WASTE = "WASTE"
     PLANNING = "PLANNING"
     PARKS = "PARKS"
+    HEATING_SUPPORT = "HEATING_SUPPORT"
     OTHER = "OTHER"
 
 
@@ -80,7 +81,7 @@ class SubmissionCreated(BaseModel):
 
 
 class Submission(SubmissionCreated, SubmissionCreate):
-    pass
+    department: str | None = None  # M3: triāžas noteiktā nodaļa
 
 
 class SubmissionListItem(BaseModel):

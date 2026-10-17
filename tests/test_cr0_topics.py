@@ -9,6 +9,7 @@ def test_cr0_ac1_topics_list(client):
         {"code": "WASTE", "name": "Atkritumi"},
         {"code": "PLANNING", "name": "Teritorijas plānošana"},
         {"code": "PARKS", "name": "Parki un skvēri"},
+        {"code": "HEATING_SUPPORT", "name": "Apkures pabalsts"},
         {"code": "OTHER", "name": "Cits"},
     ]
 

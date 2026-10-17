@@ -5,3 +5,5 @@ __pycache__/
 .ruff_cache/
 .env
 .claude/settings.local.json
+# Mācību sistēmas stāvoklis: izveido make reset
+sistema/

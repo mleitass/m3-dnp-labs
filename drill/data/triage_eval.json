@@ -1,0 +1,26 @@
+{
+  "description": "Triāžas novērtēšanas kopa: 20 sintētiski iesniegumi ar pareizo nodaļu. Pieņemšanas slieksnis: 18 no 20.",
+  "threshold": 18,
+  "items": [
+    {"subject": "Apkures pabalsts", "body": "Lūdzu piešķirt apkures pabalstu 2026./2027. gada apkures sezonai. Pielikumā izziņa par ienākumiem.", "expected": "SOCIAL"},
+    {"subject": "Iesniegums", "body": "Vēlos pieteikties apkures atbalstam. Esmu pensionārs, dzīvoju viens.", "expected": "SOCIAL"},
+    {"subject": "Kompensācija par apkuri", "body": "Lūdzu kompensēt apkures izdevumus, jo ģimenē ir trīs bērni.", "expected": "SOCIAL"},
+    {"subject": "Pieteikums apkures pabalstam", "body": "Pieprasu apkures pabalstu. Mājsaimniecībai ir trūcīgas personas statuss.", "expected": "SOCIAL"},
+    {"subject": "Jautājums", "body": "Vai apkures pabalstu var saņemt arī par malku? Mājā ir krāsns apkure.", "expected": "SOCIAL"},
+    {"subject": "Apkures pabalsta pieteikums", "body": "Lūdzu pārskatīt manu pieteikumu, iesniedzu to pagājušajā nedēļā.", "expected": "SOCIAL"},
+    {"subject": "Palīdzība vientuļam pensionāram", "body": "Kaimiņienei nepieciešama aprūpe mājās, viņa pati vairs netiek galā.", "expected": "SOCIAL"},
+    {"subject": "Sociālā palīdzība", "body": "Lūdzu izvērtēt, vai ģimenei pienākas maznodrošinātās ģimenes statuss.", "expected": "SOCIAL"},
+    {"subject": "Bedre Ezera ielā", "body": "Ezera ielā pie 12. mājas ir dziļa bedre, automašīnas brauc pa ietvi.", "expected": "UTILITIES"},
+    {"subject": "Atkritumu konteiners netiek iztukšots", "body": "Konteiners Liepu ielā 3 nav iztukšots divas nedēļas.", "expected": "UTILITIES"},
+    {"subject": "Sūdzība", "body": "Krasta ielas ietve pilna ar kritušām lapām, gājēji slīd.", "expected": "UTILITIES"},
+    {"subject": "Nedeg laternas", "body": "Dārza ielā nedeg trīs laternas jau nedēļu.", "expected": "UTILITIES"},
+    {"subject": "Būvatļauja šķūnim", "body": "Vēlos uzbūvēt šķūni savā zemes vienībā. Vai vajag būvatļauju?", "expected": "BUILDING"},
+    {"subject": "Detālplānojums", "body": "Lūdzu informāciju par detālplānojuma grozījumiem Ezermalas centrā.", "expected": "BUILDING"},
+    {"subject": "Žogs pie kaimiņa", "body": "Kaimiņš būvē žogu uz robežas bez saskaņošanas. Vai tam vajadzēja būvvaldes atļauju?", "expected": "BUILDING"},
+    {"subject": "Lūdzu salabot", "body": "Ezermalas parkā salauzti divi soliņi.", "expected": "LANDSCAPING"},
+    {"subject": "Lūgums", "body": "Skvērā pie bibliotēkas nokaltis koks, tas var uzkrist garāmgājējiem.", "expected": "LANDSCAPING"},
+    {"subject": "Rotaļu laukums", "body": "Bērnu rotaļu laukumā Liepu ielā ir bojātas šūpoles.", "expected": "LANDSCAPING"},
+    {"subject": "Pateicība", "body": "Paldies klientu apkalpošanas centra darbiniecei par laipnu palīdzību.", "expected": "CHANCERY"},
+    {"subject": "Dokumentu kopija", "body": "Lūdzu izsniegt man iepriekš iesniegtā iesnieguma kopiju.", "expected": "CHANCERY"}
+  ]
+}
